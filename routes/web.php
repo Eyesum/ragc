@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\ClassCategory;
 use App\Models\Member;
+use App\Models\Season;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/test', function () {
-   return Member::with('juniorMembers.membership.membershipType')->with('membership.membershipType')->get()->all();
+    return Season::first()->with('schedule')->first();
 });
 
 Route::get('/', function () {

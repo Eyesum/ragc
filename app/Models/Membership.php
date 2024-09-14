@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Membership extends Model
 {
     use HasFactory;
-
+    protected $table = 'memberships';
     protected $fillable = [
         'membership_type_id',
         'joined_date',

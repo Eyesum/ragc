@@ -19,7 +19,9 @@ return new class extends Migration
             $table->date('joined_date');
             $table->enum('status', array_column(\App\Enums\MembershipStatus::cases(), 'value'))
                 ->default(\App\Enums\MembershipStatus::ACTIVE->value);
-            $table->timestamps();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 

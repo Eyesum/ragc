@@ -18,7 +18,9 @@ return new class extends Migration
             $table->date('renewal_date')->nullable();
             $table->date('reminder_date')->nullable();
             $table->date('paid_date')->nullable();
-            $table->timestamps();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 

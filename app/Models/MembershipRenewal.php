@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MembershipRenewal extends Model
 {
     use HasFactory;
-
+    protected $table = 'membership_renewals';
     protected $fillable = [
         'membership_id',
         'start_date',

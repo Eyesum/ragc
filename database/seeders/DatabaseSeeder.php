@@ -2,21 +2,31 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Calibre;
 use App\Enums\MembershipStatus;
 use App\Enums\PaymentPeriod;
+use App\Models\ClassCategory;
 use App\Models\EmergencyContact;
+use App\Models\Event;
 use App\Models\JuniorMember;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\MembershipRenewal;
 use App\Models\MembershipType;
 use App\Models\Role;
+use App\Models\Score;
+use App\Models\Season;
+use App\Models\Shoot;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonPeriod;
+use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Container\Container;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -50,6 +60,12 @@ class DatabaseSeeder extends Seeder
         $this->createMembershipTypes();
         $this->createMemberships();
         $this->createMembershipRenewals();
+        Season::factory(1)->create();
+        $this->createClasses();
+        $this->createEvents();
+        $this->createShoots();
+        $this->handleClassCategoryShootData();
+        $this->handleScoreData();
     }
 
     /**
@@ -247,6 +263,11 @@ class DatabaseSeeder extends Seeder
         };
     }
 
+    /**
+     * @param  CarbonImmutable  $joinedDate
+     * @param  string  $paymentPeriod
+     * @return array
+     */
     private function generatePaidRenewal(CarbonImmutable $joinedDate, string $paymentPeriod): array
     {
         $now = Carbon::now('UTC');
@@ -282,7 +303,12 @@ class DatabaseSeeder extends Seeder
         }
     }
 
-    private function generateOverdueRenewal(CarbonImmutable $joinedDate, string $paymentPeriod)
+    /**
+     * @param  CarbonImmutable  $joinedDate
+     * @param  string  $paymentPeriod
+     * @return array
+     */
+    private function generateOverdueRenewal(CarbonImmutable $joinedDate, string $paymentPeriod): array
     {
         $now = Carbon::now('UTC');
         switch ($paymentPeriod) {
@@ -316,4 +342,128 @@ class DatabaseSeeder extends Seeder
                 ];
         }
     }
+
+    /**
+     * @return void
+     */
+    private function createClasses(): void
+    {
+        $classCategories = [
+            'Open Class',
+            'Ladies Class',
+            'Veterans Class',
+            'Juniors Class',
+            'Recoil Class',
+            '22 Class',
+            'Sticks Class',
+        ];
+
+        foreach ($classCategories as $classCategory) {
+            ClassCategory::factory()->create([
+                'name' => $classCategory,
+            ]);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function createShoots(): void
+    {
+        $seasons = Season::all();
+        foreach ($seasons as $season) {
+            $seasonStart = Carbon::parse($season->start_date)->startOfMonth();
+            $seasonEnd = Carbon::parse($season->end_date);
+            $seasonPeriod = CarbonPeriod::create($seasonStart, '1 month', $seasonEnd);
+
+            foreach ($seasonPeriod as $schedule) {
+
+                if (!$schedule->isSunday()) {
+                    $schedule->nextWeekendDay();
+                    if ($schedule->isSaturday()) {
+                        $schedule->addDay();
+                    }
+                }
+
+                Shoot::factory()->create([
+                    'name' => 'Club Shoot',
+                    'date' => $schedule->format('Y-m-d'),
+                    'start_time_utc' => '10:00:00',
+                    'end_time_utc' => '14:30:00',
+
+                ]);
+            }
+        }
+    }
+
+    private function handleClassCategoryShootData(): void
+    {
+        $shoots = Shoot::all();
+        $classCategories = ClassCategory::all();
+        foreach ($shoots as $shoot)
+        {
+            $insertArray = [];
+            foreach ($classCategories as $classCategory) {
+                $insertArray[] = [
+                    'class_category_id' => $classCategory->id,
+                    'shoot_id' => $shoot->id
+                ];
+            }
+            DB::table('class_category_shoot')->insert($insertArray);
+        }
+    }
+
+    private function handleScoreData()
+    {
+        $members = Member::all();
+        $juniorMembers = JuniorMember::all();
+        $shoots = Shoot::all();
+
+        foreach ($members as $member) {
+            $memberClass = ClassCategory::where('name', 'NOT LIKE', 'Junior%')->get()->random();
+            $this->generateMemberShootScoreData($member, $shoots, $memberClass);
+        }
+        foreach ($juniorMembers as $member) {
+            $memberClass = ClassCategory::where('name', 'LIKE', "Junior%")->get()->first();
+            $this->generateMemberShootScoreData($member, $shoots, $memberClass);
+        }
+    }
+
+    private function generateMemberShootScoreData(mixed $member, Collection $shoots, ClassCategory $memberClass): void
+    {
+        if ($memberClass->name == '22 Class') {
+           $calibre = Calibre::TWO_TWO->value;
+        } else {
+            $calibre = $this->faker->randomElement([
+                Calibre::ONE_SEVEN_SEVEN->value,
+                Calibre::TWO_TWO->value
+            ]);
+        }
+
+        foreach ($shoots as $shoot) {
+            Score::factory()->create([
+                'member_id' => $member->id,
+                'member_type' => $member::class,
+                'shoot_id' => $shoot->id,
+                'class_category_id' => $memberClass->id,
+                'score' => random_int(24, 60),
+                'calibre' => $calibre
+            ]);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function createEvents(): void
+    {
+        $seasons = Season::all();
+        foreach ($seasons as $season) {
+            Event::factory(3)->create([
+                'season_id' => $season->id,
+            ]);
+        }
+
+    }
+
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class EmergencyContact extends Model
 {
     use HasFactory;
-
+    protected $table = 'emergency_contacts';
     protected $fillable = [
         'member_id',
         'name',

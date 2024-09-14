@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Calibre;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,12 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('membership_types', function (Blueprint $table) {
+        Schema::create('scores', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('payment_period', array_column(\App\Enums\PaymentPeriod::cases(), 'value'))
-                ->default(\App\Enums\PaymentPeriod::ANNUAL->value);
-            $table->integer('cost');
+            $table->foreignId('member_id')->constrained('members');
+            $table->string('member_type');
+            $table->foreignId('shoot_id')->constrained('shoots');
+            $table->foreignId('class_category_id')->constrained('class_categories');
+            $table->integer('score')->default(0);
+            $table->enum('calibre', array_column(Calibre::cases(), 'value'))
+                ->default(Calibre::ONE_SEVEN_SEVEN->value);
             $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTimeTz('updated_at')
                 ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('membership_types');
+        Schema::dropIfExists('scores');
     }
 };

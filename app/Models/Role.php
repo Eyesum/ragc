@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
+    protected $table = 'roles';
+    protected $fillable = [
+        'name',
+        'type'
+    ];
 
     public const ROLE_TYPE_ADMIN = 'admin';
     public const ROLE_TYPE_USER = 'user';
@@ -15,16 +20,6 @@ class Role extends Model
     public const ROLE_TYPES = [
         self::ROLE_TYPE_ADMIN => self::ROLE_TYPE_ADMIN,
         self::ROLE_TYPE_USER => self::ROLE_TYPE_USER,
-    ];
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'type'
     ];
 
 

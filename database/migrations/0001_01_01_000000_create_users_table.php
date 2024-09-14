@@ -16,15 +16,15 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', \App\Models\Role::ROLE_TYPES)
                 ->default(\App\Models\Role::ROLE_TYPE_USER);
-            $table->timestamps();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
 
         // Create the default admin user
         DB::table('roles')->insert([
             'name' => 'Admin',
             'type' => \App\Models\Role::ROLE_TYPE_ADMIN,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         Schema::create('users', function (Blueprint $table) {
@@ -34,8 +34,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->timestamps();
-        });
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));        });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -50,6 +51,9 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 

@@ -8,12 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Member extends Model
 {
     use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'members';
     protected $fillable = [
         'user_id',
         'membership_number',
@@ -61,5 +56,13 @@ class Member extends Model
     public function membership(): \Illuminate\Database\Eloquent\Relations\MorphOne
     {
         return $this->morphOne(Membership::class, 'membership', 'member_type', 'member_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function scores(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Score::class, 'scores', 'member_type', 'member_id');
     }
 }

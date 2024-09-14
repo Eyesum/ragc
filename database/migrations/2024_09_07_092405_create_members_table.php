@@ -26,7 +26,9 @@ return new class extends Migration
             $table->string('county');
             $table->string('postcode');
             $table->string('id_type_seen')->nullable();
-            $table->timestamps();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 

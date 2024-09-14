@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('membership_types', function (Blueprint $table) {
+        Schema::create('shoots', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('payment_period', array_column(\App\Enums\PaymentPeriod::cases(), 'value'))
-                ->default(\App\Enums\PaymentPeriod::ANNUAL->value);
-            $table->integer('cost');
+            $table->foreignId('season_id')->constrained('seasons');
+            $table->string('name')->nullable();
+            $table->date('date');
+            $table->time('start_time_utc');
+            $table->time('end_time_utc');
             $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTimeTz('updated_at')
                 ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('membership_types');
+        Schema::dropIfExists('shoots');
     }
 };

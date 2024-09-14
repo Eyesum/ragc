@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('county')->nullable();
             $table->string('postcode')->nullable();
             $table->string('contact_number');
-            $table->timestamps();
+            $table->dateTimeTz('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTimeTz('updated_at')
+                ->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 
