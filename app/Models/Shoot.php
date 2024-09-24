@@ -31,4 +31,12 @@ class Shoot extends Model
     {
         return $this->belongsTo(Season::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function scores()
+    {
+        return $this->hasMany(Score::class);
+    }
 }

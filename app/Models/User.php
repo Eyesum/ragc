@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+
     protected $table = 'users';
     protected $fillable = [
         'role_id',
@@ -25,6 +26,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $with = [
+        'role',
+        'member'
     ];
 
     /**
@@ -51,7 +57,7 @@ class User extends Authenticatable
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function members(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function member(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Member::class);
     }
